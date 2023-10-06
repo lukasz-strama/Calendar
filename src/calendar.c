@@ -2,30 +2,35 @@
 #include <stdio.h>
 #include <time.h>
 
-void displayCalendar() {
-    // Get the current time
-    time_t t;
-    struct tm *tm_info;
-    time(&t);
-    tm_info = localtime(&t);
+// Define an array of month names for reference
+const char *month_names[] = {
+    "", "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+};
 
-    // Extract month and year
-    int current_month = tm_info->tm_mon + 1; // Adjust for zero-based indexing
-    int current_year = tm_info->tm_year + 1900; // Adjust for years since 1900
-    int current_day = tm_info->tm_mday; // Current day
+void displayCalendar(int selected_month, int current_month, int current_day) {
+    // Print the calendar header with the selected month highlighted in red
+    printf("Calendar\n");
 
-    // Print the calendar header
-    printf("Calendar for %d/%d\n", current_month, current_year);
+    // Get the name of the selected month
+    const char *selected_month_name = month_names[selected_month];
+
+    // Print the name of the selected month
+    printf("\x1b[34m%s\x1b[0m\n", selected_month_name);
+
     printf("Sun Mon Tue Wed Thu Fri Sat\n");
 
     // Array to store the number of days in each month
     int days_in_month[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-    // Calculate the number of days in the current month
-    int days = days_in_month[current_month];
+    // Calculate the number of days in the selected month
+    int days = days_in_month[selected_month];
 
-    // Calculate the day of the week on which the month starts (0 = Sunday, 1 = Monday, etc.)
-    int starting_day = (tm_info->tm_wday - (tm_info->tm_mday % 7) + 7) % 7;
+    // Calculate the day of the week on which the selected month starts (0 = Sunday, 1 = Monday, etc.)
+    // Note: You may want to adjust this calculation based on user preferences for the starting day.
+    int starting_day = 0; // Assuming Sunday as the starting day
+
+    
 
     // Print the calendar grid
     for (int day = 1; day <= days; day++) {
@@ -36,8 +41,8 @@ void displayCalendar() {
             }
         }
 
-        // Print the day with proper spacing
-        if (day == current_day) {
+        // Print the day with proper spacing and highlight the current day in red
+        if (day == current_day && selected_month == current_month) {
             printf("\x1b[31m%3d\x1b[0m ", day); // Red text for the current day
         } else {
             printf("%3d ", day);
