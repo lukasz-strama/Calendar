@@ -30,15 +30,13 @@ This is a simple console-based calendar application written in C. It allows you 
   make
   ```
 
-4. Run the calendar application:
-
-To display the interactive menu:
+4. To display the interactive menu:
 
   ```bash
   ./c_day
   ```
 
-To display a specific month (e.g., May):
+5. To display a specific month (e.g., May):
 
   ```bash
   ./c_day May
