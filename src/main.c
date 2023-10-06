@@ -1,6 +1,9 @@
 #include "common.h"
 #include "calendar.h"
-#include <stdlib.h> 
+#include <stdlib.h>
+#include <stdio.h>
+#include <conio.h>
+#include <windows.h>
 
 int main() {
     int selected_month = 0; // Variable to store the selected month (1-12)
@@ -14,45 +17,78 @@ int main() {
     current_month = tm_info->tm_mon + 1; // Adjust for zero-based indexing
     int current_day = tm_info->tm_mday;  // Current day
 
+    HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
+    DWORD fdwMode = ENABLE_EXTENDED_FLAGS | ENABLE_WINDOW_INPUT;
+    SetConsoleMode(hStdin, fdwMode);
+
     while (1) {
         // Clear the screen for better readability 
         system("cls");
 
         // Display a menu to choose a month
         printf("Choose a month:\n");
-        for (int month = 1; month <= 12; month++) {
-            if (month == current_month) {
-                // Highlight the current month in red
-                printf("\x1b[31m  %d. ", month);
-            } else {
-                printf("  %d. ", month);
+
+        int highlight_month = 1; // The initially highlighted month
+
+        while (1) {
+            // Clear the menu area before redrawing
+            COORD menuPosition = {0, 3}; // Adjust the position as needed
+            SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), menuPosition);
+            for (int month = 1; month <= 12; month++) {
+                if (month == current_month) {
+                    // Highlight the current month in red
+                    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_INTENSITY);
+                }
+
+                if (month == highlight_month) {
+                    printf("-> ");
+                } else {
+                    printf("   ");
+                }
+
+                // Print month names here
+                switch (month) {
+                    case 1: printf("January"); break;
+                    case 2: printf("February"); break;
+                    case 3: printf("March"); break;
+                    case 4: printf("April"); break;
+                    case 5: printf("May"); break;
+                    case 6: printf("June"); break;
+                    case 7: printf("July"); break;
+                    case 8: printf("August"); break;
+                    case 9: printf("September"); break;
+                    case 10: printf("October"); break;
+                    case 11: printf("November"); break;
+                    case 12: printf("December"); break;
+                    default: printf("Unknown");
+                }
+
+                if (month == current_month) {
+                    // Reset text color
+                    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+                }
+
+                printf("\n");
             }
 
-            // Print month names here
-            switch (month) {
-                case 1: printf("January"); break;
-                case 2: printf("February"); break;
-                case 3: printf("March"); break;
-                case 4: printf("April"); break;
-                case 5: printf("May"); break;
-                case 6: printf("June"); break;
-                case 7: printf("July"); break;
-                case 8: printf("August"); break;
-                case 9: printf("September"); break;
-                case 10: printf("October"); break;
-                case 11: printf("November"); break;
-                case 12: printf("December"); break;
-                default: printf("Unknown");
+            // Check for keyboard input
+            if (_kbhit()) {
+                int key = _getch();
+                if (key == 224) {
+                    key = _getch();
+                    if (key == 80) { // Down arrow
+                        highlight_month = (highlight_month % 12) + 1; // Move to the next month
+                    } else if (key == 72) { // Up arrow
+                        highlight_month = ((highlight_month - 2 + 12) % 12) + 1; // Move to the previous month
+                    }
+                } else if (key == 13) { // Enter key
+                    selected_month = highlight_month;
+                    break; // Exit the loop if Enter is pressed
+                }
             }
 
-            printf("\n\x1b[0m"); // Reset text color
+            Sleep(50); // Add a small delay to avoid high CPU usage
         }
-
-        // Input validation: Ensure the selected month is between 1 and 12
-        do {
-            printf("Enter the number of the month (0 to exit): ");
-            scanf("%d", &selected_month);
-        } while (selected_month < 0 || selected_month > 12);
 
         if (selected_month == 0) {
             break; // Exit the loop if 0 is entered
@@ -64,10 +100,14 @@ int main() {
         // Display the calendar for the selected month
         displayCalendar(selected_month, current_month, current_day);
 
+        // Clear the input buffer
+        while (_kbhit()) {
+            _getch();
+        }
+
         // Add a pause to wait for a key press
-        printf("\nPress any key to continue...");
-        getchar(); // Consume newline from previous input
-        getchar(); // Wait for user input
+        printf("\nPress any key to back...");
+        _getch(); // Wait for user input
     }
 
     return 0;
